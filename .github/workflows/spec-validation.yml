@@ -1,0 +1,66 @@
+name: OpenAPI Spec Validation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-spec:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the application repo
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Set up Java
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # 3. Build & generate OpenAPI spec (including start/fork → generate → stop)
+      - name: Build & generate OpenAPI spec
+        run: |
+          mvn clean verify -q
+        # mvn verify will:
+        #  • compile & unit-test
+        #  • pre-integration-test → spring-boot:start
+        #  • integration-test   → springdoc plugin generates target/openapi.json
+        #  • post-integration-test → spring-boot:stop
+
+      # 4. Checkout the validator repo (where your Python script lives)
+      - name: Checkout validator script
+        uses: actions/checkout@v4
+        with:
+          repository: Kesihain-Selvarajoo/API-Endorsement-POC
+          path: validator
+
+      # 5. Set up Python 3
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 6. Install Python dependencies
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas openpyxl pyyaml
+
+      # 7. Run the validator
+      - name: Validate OpenAPI vs Whitelist
+        run: |
+          python validator/validate_openapi_with_workbook.py \
+            --workbook API_CheckList_Enforcement_POC.xlsx \
+            --openapi target/openapi.json
+
+      # 8. (Optional) Deployment — only runs if validation passed
+      - name: Deploy
+        if: ${{ success() }}
+        run: |
+          echo "Validation succeeded — continuing to deploy..."
+          # your deploy commands here
