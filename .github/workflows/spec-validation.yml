@@ -41,7 +41,7 @@ jobs:
       - name: Checkout validator script
         uses: actions/checkout@v4
         with:
-          repository: Kesihain-Selvarajoo/API-Endorsement-POC
+          repository: KesihainSelvarajoo/API-Endorsement-POC
           path: validator
 
       # 5. Set up Python 3
@@ -60,7 +60,7 @@ jobs:
       - name: Validate OpenAPI vs Whitelist
         run: |
           python validator/validate_openapi_with_workbook.py \
-            --workbook API_CheckList_Enforcement_POC.xlsx \
+            --workbook validator/API_CheckList_Enforcement_POC_SUCCESS.xlsx \
             --openapi target/openapi.json
 
       # 8. (Optional) Deployment — only runs if validation passed
