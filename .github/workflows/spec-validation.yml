@@ -60,7 +60,7 @@ jobs:
       - name: Validate OpenAPI vs Whitelist
         run: |
           python validator/validate_openapi_with_workbook.py \
-            --workbook validator/API_CheckList_Enforcement_POC_SUCCESS.xlsx \
+            --workbook validator/API_CheckList_Enforcement_POC_FAIL_NOT_APPROVED.xlsx \
             --openapi target/openapi.json
 
       # 8. (Optional) Deployment — only runs if validation passed
